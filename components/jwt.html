@@ -1,0 +1,188 @@
+<script total>
+
+	exports.name = 'JWT';
+	exports.icon = 'ti ti-config';
+	exports.author = 'Total.js';
+	exports.version = '1';
+	exports.group = 'DrKlepson';
+	exports.config = { passwordKey: "password", options: {
+		algorithm: "HS256",
+		expiresTime: 30,
+		expiresType: "d",
+	}};
+	exports.inputs = [
+		{ id: 'sign', name: 'Sign' },
+		{ id: 'verify', name: 'Verify' },
+	];
+	exports.outputs = [{ id: 'success', name: 'Success' },
+					   { id: 'error', name: 'Error'},];
+
+	const jwt = require("jsonwebtoken");
+
+	const times = [
+		{id: "h", name: "Hours"},
+		{id: "d", name: "Days"},
+		{id: "m", name: "Minutes"},
+	];
+
+
+	// exports.npm = ['npm_module_1', 'npm_module_2@version'];
+	// exports.meta = { readonly: false, singleton: false, hidden: false };
+
+	exports.make = function(instance, config) {
+
+
+		instance.message_sign = function($) {
+			console.log('' + config.options.expiresTime + config.options.expiresType);
+			var data = $.data;
+			const token = jwt.sign({id: data.id}, config.passwordKey, {
+  				algorithm: config.options.algorithm,
+  				expiresIn: '' + config.options.expiresTime + config.options.expiresType,
+			});
+			data.token = token;
+			$.send('success', data);
+		};
+
+		instance.message_verify = function($) {
+			console.log('' + config.options.expiresTime + config.options.expiresType);
+			var token = $.data.token;
+			var status;
+			var data = $.data;
+
+			try {
+				const verified = jwt.verify(token, config.passwordKey, {
+  					algorithm: config.options.algorithm,
+  					expiresIn: '' + config.options.expiresTime + config.options.expiresType,
+				});
+				console.log({verified: verified});
+    			if (!verified) {
+					status = "error";
+					data = {"message":"token-verification-failed"};
+				} else {
+					data = {"message":"token-verification-successfull", "id": verified.id};
+					status = "success";
+				}
+
+			} catch (error) {
+				status = "error";
+				data = {"message":"token-verification-failed"};
+			}
+
+			console.log(status);
+			console.log(data);
+			$.send(status, data)
+			// or $.destroy();
+		};
+	};
+
+</script>
+
+<readme>
+Markdown readme
+
+```js
+var total = 'Hello world!';
+```
+</readme>
+
+<settings>
+	<div class="padding">
+		SETTINGS for this component (optional)
+		<ui-component class='padding-vertical' name="input" path="?.passwordKey">Password Key</ui-component>
+		<ui-component class='padding-vertical' name="input" path="?.options.algorithm">Algorithm</ui-component>
+
+		<div>Expires In
+			<div class='grid-2'>
+				<ui-component class='padding-horizontal' name="input" path="?.options.expiresTime"></ui-component>
+				<ui-component class='padding-horizontal' name="input" path="?.options.expiresType" config="dirsource:h|Hours,m|Minutes,d|Days"></ui-component>
+			</div>
+		</div>
+	</div>
+</settings>
+
+<style>
+	.CLASS footer { padding: 10px; font-size: 12px; }
+	.custom-center {
+  		display: flex;
+  		align-content: stretch;
+  		align-items: center;
+	}
+
+	.padding-vertical {
+		padding: 8px 0px;
+	}
+
+	.padding-horizontal {
+		flex:1;
+		padding: 0px 8px;
+	}
+</style>
+
+<script>
+
+	// Client-side script
+	// Optional, you can remove it
+
+	// A custom helper for the component instances
+	// The method below captures each instance of this component
+	TOUCH(function(exports, reinit) {
+
+		var name = exports.name + ' --> ' + exports.id;
+
+		console.log(name, 'initialized' + (reinit ? ' : UPDATE' : ''));
+
+		exports.settings = function(meta) {
+			// Triggered when the user opens settings
+			console.log(name, 'settings', meta);
+		};
+
+		exports.configure = function(config, isinit) {
+			// Triggered when the config is changed
+			console.log(name, 'configure', config);
+		};
+
+		exports.status = function(status, isinit) {
+			// Triggered when the status is changed
+			console.log(name, 'status', status);
+		};
+
+		exports.note = function(note, isinit) {
+			// Triggered when the note is changed
+			console.log(name, 'note', note);
+		};
+
+		exports.variables = function(variables) {
+			// Triggered when the variables are changed
+			console.log(name, 'variables', variables);
+		};
+
+		exports.variables2 = function(variables) {
+			// Triggered when the variables2 are changed
+			console.log(name, 'variables2', variables);
+		};
+
+		exports.redraw = function() {
+			// Flow design has been redrawn
+			console.log(name, 'redraw');
+		};
+
+		exports.move = function() {
+			// Instance has changed position
+			console.log(name, 'move');
+		};
+
+		exports.close = function() {
+			// Triggered when the instance is closing due to some reasons
+			console.log(name, 'close');
+		};
+
+	});
+
+</script>
+
+<body>
+	<header>
+		<i class="ICON"></i>NAME
+	</header>
+	<footer>Learn from existing components</footer>
+</body>
